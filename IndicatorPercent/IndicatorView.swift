@@ -13,23 +13,23 @@ import UIKit
     
     @IBInspectable var strokeWidth: CGFloat = 10 {
         didSet{
-            setNeedsDisplay()
+            self.reset()
         }
     }
     @IBInspectable var colorStrokeBackground: UIColor = #colorLiteral(red: 0.1921568662, green: 0.007843137719, blue: 0.09019608051, alpha: 1) {
         didSet{
-            setNeedsDisplay()
+            self.reset()
         }
     }
     @IBInspectable var colorStrokeProcess: UIColor = #colorLiteral(red: 0.4666666687, green: 0.7647058964, blue: 0.2666666806, alpha: 1) {
         didSet{
-            setNeedsDisplay()
+            self.reset()
         }
     }
     
     @IBInspectable var ratio: CGFloat = 1 {
         didSet{
-            setNeedsDisplay()
+            self.reset()
         }
     }
     
@@ -39,6 +39,16 @@ import UIKit
             nValue = min(nValue, 1)
             nValue = max(nValue, 0)
             processLayer?.strokeEnd = nValue
+        }
+    }
+    
+    fileprivate var currentOrientation = UIApplication.shared.statusBarOrientation {
+        didSet {
+            guard currentOrientation != oldValue else {
+                return
+            }
+            
+            self.reset()
         }
     }
     
@@ -61,6 +71,14 @@ import UIKit
         
         self.layer.addSublayer(bgShape)
         self.layer.addSublayer(pShape)
+    }
+    
+    fileprivate func reset() {
+        self.layer.sublayers?.forEach({
+            $0.removeFromSuperlayer()
+        })
+        
+        setNeedsDisplay()
     }
     
     fileprivate func createCircleLayer(start: Double = 0,
@@ -93,6 +111,11 @@ import UIKit
         circle.lineCap = kCALineCapRound
         
         return circle
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        currentOrientation = UIApplication.shared.statusBarOrientation
     }
     
 }
